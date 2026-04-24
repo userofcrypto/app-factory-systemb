@@ -1,18 +1,12 @@
 export function createPlan(intent: string, command: string) {
   return {
     intent,
-    project: "factory-generated-app",
+    project: "factory-app",
     stack: {
       frontend: "nextjs",
-      backend: "vercel-functions",
+      backend: "vercel",
       database: "supabase"
     },
-    steps: [
-      "create-github-structure",
-      "generate-code",
-      "setup-database",
-      "prepare-deployment"
-    ],
     raw: command
   };
 }
