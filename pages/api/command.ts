@@ -10,19 +10,24 @@ export default async function handler(req, res) {
       input: command
     };
 
-    const { data, error } = await supabase.from("commands").insert([
-      {
-        command,
-        response
-      }
-    ]);
+    const { data, error } = await supabase
+      .from("commands")
+      .insert([
+        {
+          command,
+          response
+        }
+      ]);
 
     if (error) {
       return res.status(500).json({ error });
     }
 
-    res.json({ success: true, command, response });
+    return res.json({
+      success: true,
+      data
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 }
