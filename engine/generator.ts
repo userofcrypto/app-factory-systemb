@@ -1,11 +1,22 @@
-export function generateProject(plan: any) {
+type Plan = {
+  intent: string;
+  steps: string[];
+  raw: string;
+};
+
+export function generateExecution(plan: Plan) {
+  const results = plan.steps.map((step, index) => {
+    return {
+      step: index + 1,
+      action: step,
+      status: "completed"
+    };
+  });
+
   return {
-    project: plan.project,
-    status: "generated",
-    structure: [
-      "pages/",
-      "engine/",
-      "lib/"
-    ]
+    intent: plan.intent,
+    raw: plan.raw,
+    executed: true,
+    results
   };
 }
