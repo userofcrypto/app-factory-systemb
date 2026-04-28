@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import { interpretCommand } from "../../lib/engine/interpreter";
+import { interpretCommand } from "../../engine/interpreter";
 export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
