@@ -1,16 +1,16 @@
 import { supabase } from "../../lib/supabase";
-
+import { interpretCommand } from "../../lib/engine/interpreter";
 export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const command = body?.command ?? "fallback";
-
+    const interpreted = interpretCommand(command);
     const result = await supabase
       .from("commands")
       .insert([
         {
           command,
-          response: { message: "stored", input: command }
+          response: interpreted
         }
       ])
       .select();
