@@ -1,3 +1,4 @@
+import { generateExecution } from "../../engine/generator";
 import { planCommand } from "../../engine/planner";
 import { supabase } from "../../lib/supabase";
 import { interpretCommand } from "../../engine/interpreter";
@@ -7,15 +8,17 @@ export default async function handler(req, res) {
     const command = body?.command ?? "fallback";
     const interpreted = interpretCommand(command);
     const plan = planCommand(interpreted);
+    const execution = generateExecution(plan);
     const result = await supabase
       .from("commands")
       .insert([
         {
           command,
           response: {
-             interpretation: interpreted,
-             plan
-           }
+  interpretation: interpreted,
+  plan,
+  execution
+}
         }
       ])
       .select();
