@@ -1,13 +1,11 @@
 import { supabase } from "../lib/supabase";
 
-type Intent = "create" | "read" | "delete" | "update" | "unknown";
-
 type Input = {
-  intent: Intent;
+  intent: string;
   raw: string;
 };
 
-const tools = {
+const tools: Record<string, (raw: string) => Promise<any>> = {
   create: async (raw: string) => {
     const name = raw.split(" ").slice(1).join(" ") || "Unnamed";
 
@@ -63,13 +61,13 @@ const tools = {
 };
 
 export async function generateExecution(input: Input) {
-  const tool = tools[input.intent as keyof typeof tools];
+  const tool = tools[input.intent];
 
   if (!tool) {
     return {
       intent: input.intent,
       raw: input.raw,
-      error: "no tool found"
+      output: { error: "no tool found" }
     };
   }
 
