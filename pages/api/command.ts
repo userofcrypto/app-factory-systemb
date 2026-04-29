@@ -1,37 +1,44 @@
 import { generateExecution } from "../../engine/generator";
-import { supabase } from "../../lib/supabase";
 import { interpretCommand } from "../../engine/interpreter";
+import { supabase } from "../../lib/supabase";
 
 export default async function handler(req, res) {
   try {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    const command = body?.command ?? "fallback";
+    const command = body?.command ?? "";
 
-    const interpreted = interpretCommand(command);
+    const interpretation = interpretCommand(command);
 
     const execution = await generateExecution({
-      intent: interpreted.intent,
+      intent: interpretation.intent,
       raw: command
     });
 
-    const result = await supabase
+    const { data, error } = await supabase
       .from("commands")
       .insert([
         {
           command,
           response: {
-            interpretation: interpreted,
+            intent: interpretation.intent,
             execution
           }
         }
       ])
       .select();
 
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+
     return res.json({
       success: true,
-      data: result
+      data
     });
   } catch (err: any) {
     return res.status(500).json({
