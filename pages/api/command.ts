@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const command = body?.command ?? "fallback";
     const interpreted = interpretCommand(command);
     const plan = planCommand(interpreted);
-    const execution = generateExecution(plan);
+    const execution = await generateExecution(plan);
     const result = await supabase
       .from("commands")
       .insert([
