@@ -1,13 +1,13 @@
 import { supabase } from "../lib/supabase";
 
 type Plan = {
-  intent: string;
-  steps: string[];
+  intent: "create" | "read" | "delete" | "update" | string;
+  steps?: string[];
   raw: string;
 };
 
 const tools: Record<string, (input: string) => Promise<any>> = {
-  "execute create operation": async (input: string) => {
+  create: async (input: string) => {
     const parts = input.split(" ");
     const name = parts.slice(1).join(" ") || "Unnamed";
 
@@ -16,26 +16,22 @@ const tools: Record<string, (input: string) => Promise<any>> = {
       .insert([{ name }])
       .select();
 
-    if (error) {
-      return { error: error.message };
-    }
+    if (error) return { error: error.message };
 
     return { message: "User created (real)", data };
   },
 
-  "fetch data": async () => {
+  read: async () => {
     const { data, error } = await supabase
       .from("users")
       .select("*");
 
-    if (error) {
-      return { error: error.message };
-    }
+    if (error) return { error: error.message };
 
     return { data };
   },
 
-  "execute deletion": async (input: string) => {
+  delete: async (input: string) => {
     const parts = input.split(" ");
     const name = parts.slice(1).join(" ");
 
@@ -45,40 +41,32 @@ const tools: Record<string, (input: string) => Promise<any>> = {
       .eq("name", name)
       .select();
 
-    if (error) {
-      return { error: error.message };
-    }
+    if (error) return { error: error.message };
 
     return { message: "User deleted (real)", data };
   }
 };
 
 export async function generateExecution(plan: Plan) {
-  const results = [];
+  const intent = plan.intent;
 
-  for (let index = 0; index < plan.steps.length; index++) {
-    const step = plan.steps[index];
+  const tool = tools[intent];
 
-    let output;
-
-    if (tools[step]) {
-      output = await tools[step](plan.raw);
-    } else {
-      output = { message: "no tool mapped" };
-    }
-
-    results.push({
-      step: index + 1,
-      action: step,
-      status: "completed",
-      output
-    });
+  if (!tool) {
+    return {
+      intent,
+      raw: plan.raw,
+      executed: false,
+      error: "No tool mapped to intent"
+    };
   }
 
+  const output = await tool(plan.raw);
+
   return {
-    intent: plan.intent,
+    intent,
     raw: plan.raw,
     executed: true,
-    results
+    output
   };
 }
