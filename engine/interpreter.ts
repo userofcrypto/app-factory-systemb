@@ -1,27 +1,21 @@
-export type Intent =
-  | "create"
-  | "read"
-  | "update"
-  | "delete"
-  | "unknown";
+export function interpretCommand(command: string) {
+  const raw = command.toLowerCase().trim();
 
-export function interpretCommand(command: string): {
-  intent: Intent;
-  raw: string;
-} {
-  const text = command.toLowerCase().trim();
+  if (raw.startsWith("create")) {
+    return { intent: "create", raw: command };
+  }
 
-  const firstWord = text.split(" ")[0];
+  if (raw.startsWith("read") || raw === "list") {
+    return { intent: "read", raw: command };
+  }
 
-  let intent: Intent = "unknown";
+  if (raw.startsWith("delete") || raw.startsWith("remove")) {
+    return { intent: "delete", raw: command };
+  }
 
-  if (firstWord === "create") intent = "create";
-  else if (firstWord === "show" || firstWord === "get") intent = "read";
-  else if (firstWord === "update") intent = "update";
-  else if (firstWord === "delete") intent = "delete";
+  if (raw.startsWith("update") || raw.startsWith("edit")) {
+    return { intent: "update", raw: command };
+  }
 
-  return {
-    intent,
-    raw: command
-  };
+  return { intent: "unknown", raw: command };
 }
