@@ -6,15 +6,15 @@ type Plan = {
   raw: string;
 };
 
-const tools = {
+const tools: Record<string, (input: string) => Promise<any>> = {
   "execute create operation": async (input: string) => {
-    // extract name from command: "create John" → "John"
     const parts = input.split(" ");
     const name = parts.slice(1).join(" ") || "Unnamed";
 
     const { data, error } = await supabase
       .from("users")
-      .insert([{ name }]);
+      .insert([{ name }])
+      .select();
 
     if (error) {
       return { error: error.message };
@@ -42,7 +42,8 @@ const tools = {
     const { data, error } = await supabase
       .from("users")
       .delete()
-      .eq("name", name);
+      .eq("name", name)
+      .select();
 
     if (error) {
       return { error: error.message };
@@ -60,8 +61,8 @@ export async function generateExecution(plan: Plan) {
 
     let output;
 
-    if (tools[step as keyof typeof tools]) {
-      output = await tools[step as keyof typeof tools](plan.raw);
+    if (tools[step]) {
+      output = await tools[step](plan.raw);
     } else {
       output = { message: "no tool mapped" };
     }
