@@ -66,8 +66,9 @@ export async function generateExecution(input: Input) {
   if (!tool) {
     return {
       intent: input.intent,
-      raw: input.raw,
-      output: { error: "no tool found" }
+      execution: {
+        error: "no tool found"
+      }
     };
   }
 
@@ -75,7 +76,8 @@ export async function generateExecution(input: Input) {
 
   return {
     intent: input.intent,
-    raw: input.raw,
-    output
+    execution: {
+      output
+    }
   };
 }
