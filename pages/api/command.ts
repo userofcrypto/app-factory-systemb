@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const interpretation = interpretCommand(command);
 
     const execution = await generateExecution({
-      intent: interpretation.intent,
+      intent: interpretation.intent as any,
       raw: command
     });
 
