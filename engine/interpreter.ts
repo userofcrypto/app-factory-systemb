@@ -1,20 +1,20 @@
 export function interpretCommand(command: string) {
-  const raw = command.toLowerCase().trim();
+  const lower = command.toLowerCase();
 
-  if (raw.startsWith("create")) {
+  if (lower.startsWith("create")) {
     return { intent: "create", raw: command };
   }
 
-  if (raw.startsWith("read") || raw === "list") {
-    return { intent: "read", raw: command };
-  }
-
-  if (raw.startsWith("delete") || raw.startsWith("remove")) {
+  if (lower.startsWith("delete")) {
     return { intent: "delete", raw: command };
   }
 
-  if (raw.startsWith("update") || raw.startsWith("edit")) {
+  if (lower.startsWith("update")) {
     return { intent: "update", raw: command };
+  }
+
+  if (lower.startsWith("read") || lower.startsWith("get")) {
+    return { intent: "read", raw: command };
   }
 
   return { intent: "unknown", raw: command };
