@@ -2,14 +2,14 @@ import { supabase } from "../lib/supabase";
 
 type Intent = "create" | "read" | "delete" | "update" | "unknown";
 
-type Plan = {
+type Input = {
   intent: Intent;
   raw: string;
 };
 
-const tools: Record<string, (input: string) => Promise<any>> = {
-  create: async (input: string) => {
-    const name = input.split(" ").slice(1).join(" ") || "Unnamed";
+const tools = {
+  create: async (raw: string) => {
+    const name = raw.split(" ").slice(1).join(" ") || "Unnamed";
 
     const { data, error } = await supabase
       .from("users")
@@ -18,7 +18,7 @@ const tools: Record<string, (input: string) => Promise<any>> = {
 
     if (error) return { error: error.message };
 
-    return { message: "created", data };
+    return { data };
   },
 
   read: async () => {
@@ -31,8 +31,8 @@ const tools: Record<string, (input: string) => Promise<any>> = {
     return { data };
   },
 
-  delete: async (input: string) => {
-    const name = input.split(" ").slice(1).join(" ");
+  delete: async (raw: string) => {
+    const name = raw.split(" ").slice(1).join(" ");
 
     const { data, error } = await supabase
       .from("users")
@@ -42,44 +42,42 @@ const tools: Record<string, (input: string) => Promise<any>> = {
 
     if (error) return { error: error.message };
 
-    return { message: "deleted", data };
+    return { data };
   },
 
-  update: async (input: string) => {
-    const parts = input.split(" ");
-    const name = parts[1];
+  update: async (raw: string) => {
+    const parts = raw.split(" ");
+    const oldName = parts[1];
     const newName = parts[2];
 
     const { data, error } = await supabase
       .from("users")
       .update({ name: newName })
-      .eq("name", name)
+      .eq("name", oldName)
       .select();
 
     if (error) return { error: error.message };
 
-    return { message: "updated", data };
+    return { data };
   }
 };
 
-export async function generateExecution(plan: Plan) {
-  const tool = tools[plan.intent];
+export async function generateExecution(input: Input) {
+  const tool = tools[input.intent as keyof typeof tools];
 
   if (!tool) {
     return {
-      intent: plan.intent,
-      raw: plan.raw,
-      executed: false,
-      error: "No tool for intent"
+      intent: input.intent,
+      raw: input.raw,
+      error: "no tool found"
     };
   }
 
-  const output = await tool(plan.raw);
+  const output = await tool(input.raw);
 
   return {
-    intent: plan.intent,
-    raw: plan.raw,
-    executed: true,
+    intent: input.intent,
+    raw: input.raw,
     output
   };
 }
