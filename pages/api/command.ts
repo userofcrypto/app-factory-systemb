@@ -13,10 +13,8 @@ export default async function handler(req, res) {
 console.log("Debug - Command:", command, "Intent:", interpretation.intent);
 
     // ONLY execution, no plan anywhere
-    const execution = await generateExecution({
-      intent: interpretation.intent,
-      raw: command
-    });
+    const execution = await generateExecution({ intent: interpretation.intent, raw: command }) || { execution: { error: "Execution failed" } }; 
+    
 
     const cleanResponse = {
       intent: interpretation.intent,
