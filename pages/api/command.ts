@@ -10,6 +10,7 @@ export default async function handler(req, res) {
     const command = body?.command ?? "";
 
     const interpretation = interpretCommand(command);
+console.log("Debug - Command:", command, "Intent:", interpretation.intent);
 
     // ONLY execution, no plan anywhere
     const execution = await generateExecution({
